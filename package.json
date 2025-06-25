@@ -16,7 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@adiwajshing/baileys": "^6.7.2",
+    "baileys": "^6.7.5",
     "express": "^4.19.2",
     "pino": "^9.2.0"
   }
