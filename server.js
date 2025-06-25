@@ -1,15 +1,15 @@
 // server.js
+// server.js
 const express = require('express');
 const {
     default: makeWASocket,
-    useMultiFileAuthState,
-    generateWAMessageFromContent,
-    DisconnectReason
-} = require('baileys');
+    useInMemoryAuthState,
+    DisconnectReason,
+    fetchLatestBaileysVersion,
+    Browsers // We will use this to specify a different browser
+} = require('@whiskeysockets/baileys');
 const pino = require('pino');
 const { Boom } = require('@hapi/boom');
-const fs = require('fs');
-const path = require('path');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -17,69 +17,51 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static('public'));
 
-// Store active sessions
-const sessions = {};
-
-// Ensure the sessions directory exists
-if (!fs.existsSync('./sessions')) {
-    fs.mkdirSync('./sessions');
-}
-
-const createSession = async (sessionId) => {
-    const sessionFile = `sessions/${sessionId}`;
-    const { state, saveCreds } = await useMultiFileAuthState(sessionFile);
-
-    const sock = makeWASocket({
-        logger: pino({ level: 'silent' }),
-        printQRInTerminal: false,
-        auth: state,
-        browser: ['SPECTRE', 'Chrome', '1.0.0']
-    });
-
-    sessions[sessionId] = { sock, connectionStatus: 'connecting' };
-
-    sock.ev.on('creds.update', saveCreds);
-
-    sock.ev.on('connection.update', (update) => {
-        const { connection, lastDisconnect } = update;
-        if (connection === 'open') {
-            sessions[sessionId].connectionStatus = 'connected';
-            console.log(`Session ${sessionId} connected.`);
-        } else if (connection === 'close') {
-            const statusCode = (lastDisconnect.error instanceof Boom)?.output?.statusCode;
-            if (statusCode !== DisconnectReason.loggedOut) {
-                console.log(`Reconnecting session ${sessionId}...`);
-                createSession(sessionId);
-            } else {
-                console.log(`Session ${sessionId} logged out.`);
-                fs.rmSync(sessionFile, { recursive: true, force: true });
-                delete sessions[sessionId];
-            }
-        }
-    });
-
-    return sock;
-};
-
 app.post('/generate-code', async (req, res) => {
     const { phoneNumber } = req.body;
-    if (!phoneNumber) {
-        return res.status(400).json({ success: false, message: 'Phone number is required.' });
+    if (!phoneNumber || !/^\d+$/.test(phoneNumber)) {
+        return res.status(400).json({ success: false, message: 'A valid phone number is required.' });
     }
-
-    const sessionId = Date.now().toString(); // Create a unique session ID
-    const sock = await createSession(sessionId);
+    console.log(`[Request] Received request to generate code for: ${phoneNumber}`);
 
     try {
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        const { state, saveCreds } = await useInMemoryAuthState();
+        const { version, isLatest } = await fetchLatestBaileysVersion();
+        
+        console.log(`[Baileys] Using version: ${version.join('.')}, isLatest: ${isLatest}`);
+
+        const sock = makeWASocket({
+            version,
+            logger: pino({ level: 'silent' }),
+            printQRInTerminal: false,
+            auth: state,
+            // --- THIS IS THE CHANGE ---
+            // We are now identifying as the official WhatsApp Mac app
+            browser: Browsers.macOS('Desktop') 
+        });
+
+        sock.ev.on('connection.update', (update) => {
+            const { connection, lastDisconnect } = update;
+            if (connection === 'close') {
+                const reason = new Boom(lastDisconnect?.error)?.output.statusCode;
+                console.log(`[Connection] Closed due to: ${DisconnectReason[reason] || 'Unknown Reason'}`);
+            }
+        });
+
+        console.log(`[Pairing] Requesting pairing code for ${phoneNumber}...`);
+        
         const code = await sock.requestPairingCode(phoneNumber);
-        res.json({ success: true, sessionId, code });
+        const formattedCode = code?.match(/.{1,4}/g)?.join('-') || code;
+
+        console.log(`[Pairing] Successfully generated code: ${formattedCode}`);
+        
+        res.json({ success: true, code: formattedCode });
+
     } catch (error) {
-        console.error('Error generating pairing code:', error);
-        res.status(500).json({ success: false, message: 'Failed to generate pairing code.' });
+        console.error('[Error] Failed to generate pairing code:', error);
+        res.status(500).json({ success: false, message: 'An internal server error occurred. Please check the logs.' });
     }
 });
-
 
 // The user-provided crash function, adapted for our server
 async function protocolbugv10(sock, target) {
