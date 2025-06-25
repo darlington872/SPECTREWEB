@@ -5,7 +5,7 @@ const {
     useMultiFileAuthState,
     generateWAMessageFromContent,
     DisconnectReason
-} = require('@adiwajshing/baileys');
+} = require('baileys');
 const pino = require('pino');
 const { Boom } = require('@hapi/boom');
 const fs = require('fs');
