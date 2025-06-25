@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPECTRE WEB CRASHER</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div id="connectionView">
+            <h1>SPECTRE WEB CRASHER</h1>
+            <p>Connect your WhatsApp account to begin.</p>
+            
+            <form id="phoneForm">
+                <input type="tel" id="phoneNumber" placeholder="Enter your full phone number" required>
+                <button type="submit" id="generateBtn">Generate Code</button>
+            </form>
+            
+            <div id="codeDisplay" class="hidden">
+                <h2>Your Pairing Code:</h2>
+                <div id="pairingCode"></div>
+                <p class="instructions">
+                    Enter this code on your phone in WhatsApp > Settings > Linked Devices > Link with phone number instead.
+                </p>
+                <p class="wait-text">Waiting for connection... Once connected, this panel will change.</p>
+            </div>
+        </div>
+
+        <div id="senderView" class="hidden">
+            <h1>SPECTRE</h1>
+            <p class="connected-text">Session Connected!</p>
+            
+            <form id="senderForm">
+                <input type="tel" id="targetNumber" placeholder="Enter target's phone number" required>
+                <button type="submit" id="sendBtn">SEND CRASH</button>
+            </form>
+        </div>
+
+        <div id="loading" class="hidden">
+            <div class="spinner"></div>
+            <p>Please wait...</p>
+        </div>
+        <div id="error" class="hidden"></div>
+        <div id="success" class="hidden"></div>
+
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
