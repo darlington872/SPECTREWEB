@@ -7,7 +7,7 @@ const {
     DisconnectReason,
     fetchLatestBaileysVersion,
     Browsers // We will use this to specify a different browser
-} = require('@whiskeysockets/baileys');
+} = require('baileys');
 const pino = require('pino');
 const { Boom } = require('@hapi/boom');
 
