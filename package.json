@@ -1,0 +1,23 @@
+{
+  "name": "spectre-web-crasher",
+  "version": "1.0.0",
+  "description": "A web app to connect to WhatsApp and send a crash payload.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": "18.x"
+  },
+  "keywords": [
+    "whatsapp",
+    "baileys"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@adiwajshing/baileys": "^6.7.2",
+    "express": "^4.19.2",
+    "pino": "^9.2.0"
+  }
+}
