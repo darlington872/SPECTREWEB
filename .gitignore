@@ -1,0 +1,14 @@
+# Dependencies
+/node_modules
+
+# Session files
+/sessions
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Optional files
+.DS_Store
