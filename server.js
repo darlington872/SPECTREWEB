@@ -7,7 +7,7 @@ const {
     fetchLatestBaileysVersion,
     generateWAMessageFromContent,
     Browsers
-} = require('@whiskeysockets/baileys');
+} = require('baileys');
 const pino = require('pino');
 const { Boom } = require('@hapi/boom');
 const fs = require('fs');
