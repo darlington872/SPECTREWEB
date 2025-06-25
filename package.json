@@ -16,7 +16,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "baileys": "^6.7.5",
+    "@whiskeysockets/baileys": "^6.7.2",
+    "@hapi/boom": "^10.0.1",
     "express": "^4.19.2",
     "pino": "^9.2.0"
   }
